@@ -1,16 +1,17 @@
 package com.example.rajatbhagat.recyclerviewexample;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
+import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,19 +28,21 @@ public class MainActivity extends AppCompatActivity {
             "Metal Gear Solid",
             "Resident Evil",
             "FIFA 17",
-            "Alto's Adventure"
+            "Alto's Adventure",
+            "Doom",
+            "Pro Evolution Soccer"
     };
     private String[] gameDetails = {
             "Niantic",
             "Square Enix",
-            "Dont Know",
-            "This also I dont know",
+            "Konami",
+            "Konami",
             "EA Sports",
-            "Some Android Developer"
+            "Some Android Developer",
+            "ID",
+            "Konami"
     };
 
-    private RequestQueue requestQueue;
-    private ProgressDialog progressDialog;
     private ActionBar actionBar;
 
     @Override
@@ -70,12 +73,63 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
         );
+
+        SwipeableRecyclerViewTouchListener cardSwipeListener = new SwipeableRecyclerViewTouchListener(
+                recyclerView,
+                new SwipeableRecyclerViewTouchListener.SwipeListener() {
+
+                    @Override
+                    public boolean canSwipeLeft(int position) {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean canSwipeRight(int position) {
+                        return true;
+                    }
+
+                    @Override
+                    public void onDismissedBySwipeLeft(final RecyclerView recyclerView, int[] reverseSortedPositions) {
+                        for (int position : reverseSortedPositions) {
+                            gameList.remove(position);
+                            Snackbar snackbar = Snackbar.make(recyclerView, "Card Removed : " + position + " by swiping left", Snackbar.LENGTH_SHORT)
+                                    .setAction("UNDO", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Toast.makeText(MainActivity.this, "To be implemented", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                            snackbar.show();
+                            gameAdapter.notifyItemRemoved(position);
+                        }
+                        gameAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                        for (int position : reverseSortedPositions) {
+                            gameList.remove(position);
+                            Snackbar snackbar = Snackbar.make(recyclerView, "Card Removed : " + position + " by swiping right", Snackbar.LENGTH_LONG)
+                                    .setAction("UNDO", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Toast.makeText(MainActivity.this, "To be implemented", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                            snackbar.show();
+                            gameAdapter.notifyItemRemoved(position);
+                        }
+                        gameAdapter.notifyDataSetChanged();
+                    }
+                }
+        );
+        recyclerView.addOnItemTouchListener(cardSwipeListener);
     }
 
     private List<Game> fillGameData() {
         List<Game> gameTempList = new ArrayList<>();
 
-        for(int i = 0; i < gameTitles.length; i++) {
+        for (int i = 0; i < gameTitles.length; i++) {
             Game game = new Game();
             game.setGameTitle(gameTitles[i]);
             game.setGameDeveloper(gameDetails[i]);
